@@ -44,6 +44,8 @@ public class Inky extends Ghost {
      */
     private static final int MOVE_INTERVAL = 250;
 
+    private Random random = new Random();  // Compliant
+
     /**
      * Creates a new "Inky".
      *
@@ -138,7 +140,7 @@ public class Inky extends Ghost {
         if (directions.isEmpty()) {
             return null;
         }
-        int i = new Random().nextInt(directions.size());
+        int i = this.random.nextInt(directions.size());
         return directions.get(i);
     }
 }
