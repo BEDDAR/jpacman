@@ -89,11 +89,9 @@ public class CollisionInteractionMap implements CollisionMap {
      */
     private void addHandler(Class<? extends Unit> collider,
                             Class<? extends Unit> collidee, CollisionHandler<?, ?> handler) {
-        if (!handlers.containsKey(collider)) {
-            handlers.put(collider, new HashMap<>());
-        }
 
-        Map<Class<? extends Unit>, CollisionHandler<?, ?>> map = handlers.get(collider);
+        Map<Class<? extends Unit>, CollisionHandler<?, ?>> map =
+            handlers.computeIfAbsent(collider, k -> new HashMap<>());
         map.put(collidee, handler);
     }
 
@@ -115,23 +113,33 @@ public class CollisionInteractionMap implements CollisionMap {
     @Override
     public <C1 extends Unit, C2 extends Unit> void collide(C1 collider,
                                                            C2 collidee) {
-        Class<? extends Unit> colliderKey = getMostSpecificClass(handlers, collider.getClass());
-        if (colliderKey == null) {
-            return;
-        }
 
-        Map<Class<? extends Unit>, CollisionHandler<?, ?>> map = handlers.get(colliderKey);
-        Class<? extends Unit> collideeKey = getMostSpecificClass(map, collidee.getClass());
-        if (collideeKey == null) {
-            return;
-        }
-
-        CollisionHandler<C1, C2> collisionHandler = (CollisionHandler<C1, C2>) map.get(collideeKey);
+        CollisionHandler<C1, C2> collisionHandler = resolveHandler(collider, collidee);
         if (collisionHandler == null) {
             return;
         }
 
         collisionHandler.handleCollision(collider, collidee);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <C1 extends Unit, C2 extends Unit>
+    CollisionHandler<C1, C2> resolveHandler(C1 collider, C2 collidee) {
+
+        Class<? extends Unit> colliderKey = getMostSpecificClass(handlers, collider.getClass());
+        if (colliderKey == null) {
+            return null;
+        }
+
+        Map<Class<? extends Unit>, CollisionHandler<?, ?>> map = handlers.get(colliderKey);
+        Class<? extends Unit> collideeKey = getMostSpecificClass(map, collidee.getClass());
+        if (collideeKey == null) {
+            return null;
+        }
+
+        return (CollisionHandler<C1, C2>) map.get(collideeKey);
+
+
     }
 
     /**
@@ -148,11 +156,13 @@ public class CollisionInteractionMap implements CollisionMap {
         Map<Class<? extends Unit>, ?> map, Class<? extends Unit> key) {
         List<Class<? extends Unit>> collideeInheritance = getInheritance(key);
         for (Class<? extends Unit> pointer : collideeInheritance) {
-            if (map.containsKey(pointer)) {
-                return pointer;
-            }
+            if (checkMapKey(map, pointer)) return pointer;
         }
         return null;
+    }
+
+    private static boolean checkMapKey(Map<Class<? extends Unit>, ?> map, Class<? extends Unit> pointer) {
+        return map.containsKey(pointer);
     }
 
     /**
@@ -173,18 +183,24 @@ public class CollisionInteractionMap implements CollisionMap {
         while (found.size() > index) {
             Class<?> current = found.get(index);
             Class<?> superClass = current.getSuperclass();
-            if (superClass != null && Unit.class.isAssignableFrom(superClass)) {
-                found.add((Class<? extends Unit>) superClass);
-            }
+            addIfAssignable(superClass, Unit.class, found);
             for (Class<?> classInterface : current.getInterfaces()) {
-                if (Unit.class.isAssignableFrom(classInterface)) {
-                    found.add((Class<? extends Unit>) classInterface);
-                }
+                addIfAssignable(classInterface, Unit.class, found);
             }
             index++;
         }
 
         return found;
+    }
+
+    private static <T> void addIfAssignable(
+        Class<?> candidate,
+        Class<T> targetType,
+        List<Class<? extends T>> found) {
+
+        if (candidate != null && targetType.isAssignableFrom(candidate)) {
+            found.add(candidate.asSubclass(targetType));
+        }
     }
 
     /**
