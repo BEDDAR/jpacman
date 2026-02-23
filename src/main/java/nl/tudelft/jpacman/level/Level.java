@@ -197,7 +197,10 @@ public class Level {
         validateNotNull(unit, "Can't move a null unit.");
         validateNotNull(direction, "Can't move in a null direction.");
 
-        assert unit.hasSquare();
+        // Remplace l'assert par un check explicite
+        if (!unit.hasSquare()) {
+            throw new IllegalStateException("Unit must be on a square to move.");
+        }
 
         if (!isInProgress()) {
             return;
@@ -339,11 +342,11 @@ public class Level {
      * @return The amount of pellets remaining on the board.
      */
     public int remainingPellets() {
-        Board board = getBoard();
+        Board currentBoard = getBoard();
         int pellets = 0;
-        for (int x = 0; x < board.getWidth(); x++) {
-            for (int y = 0; y < board.getHeight(); y++) {
-                pellets += countPellets(board, x, y);
+        for (int x = 0; x < currentBoard.getWidth(); x++) {
+            for (int y = 0; y < currentBoard.getHeight(); y++) {
+                pellets += countPellets(currentBoard, x, y);
             }
         }
         if (pellets < 0) {
