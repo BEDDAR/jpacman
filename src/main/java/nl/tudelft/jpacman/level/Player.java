@@ -14,6 +14,8 @@ import nl.tudelft.jpacman.sprite.Sprite;
  */
 public class Player extends Unit {
 
+    private int lives = 3;
+
     /**
      * The amount of points accumulated by this player.
      */
@@ -127,5 +129,15 @@ public class Player extends Unit {
      */
     public void addPoints(int points) {
         score += points;
+    }
+
+    /* Gets the number of lives the player has left */
+    public int getLives() {
+        return lives;
+    }
+
+    /* Decrements the number of lives of the player */
+    public void loseLife() {
+        lives--;
     }
 }

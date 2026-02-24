@@ -264,8 +264,19 @@ public class Level {
      */
     private void updateObservers() {
         if (!isAnyPlayerAlive()) {
-            for (LevelObserver observer : observers) {
-                observer.levelLost();
+            for (Player player : players) {
+                if (!player.isAlive()) {
+                    if (player.getLives() > 0) {
+                        player.leaveSquare();
+                        player.occupy(startSquares.get(0));
+                        player.setAlive(true);
+                    } else {
+                        for (LevelObserver observer : observers) {
+                            observer.levelLost();
+                        }
+                        return;
+                    }
+                }
             }
         }
         if (remainingPellets() == 0) {
