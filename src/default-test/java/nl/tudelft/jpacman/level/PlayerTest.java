@@ -28,9 +28,11 @@ class PlayerTest {
     }
 
     // Un joueur créé doit avoir exactement 3 vies.
+    private static final int INITIAL_LIVES = 3;
+
     @Test
     void startsWithThreeLives() {
-        assertThat(player.getLives()).isEqualTo(3);
+        assertThat(player.getLives()).isEqualTo(INITIAL_LIVES);
     }
 
     // Chaque appel à loseLife() doit décrémenter d'exactement 1.

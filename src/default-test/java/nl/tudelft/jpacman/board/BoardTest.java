@@ -46,8 +46,8 @@ class BoardTest {
      */
     @ParameterizedTest
     @CsvSource({
-            "0, 0",
-            "1, 2",
+        "0, 0",
+        "1, 2",
         "0, 1"
     })
     void testSquareAt(int x, int y) {
