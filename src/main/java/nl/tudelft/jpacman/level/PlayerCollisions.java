@@ -32,35 +32,35 @@ public class PlayerCollisions implements CollisionMap {
 
     @Override
     public void collide(Unit mover, Unit collidedOn) {
-        if (mover instanceof Player) {
-            playerColliding((Player) mover, collidedOn);
+        if (mover instanceof Player player) {
+            playerColliding(player, collidedOn);
         }
-        else if (mover instanceof Ghost) {
-            ghostColliding((Ghost) mover, collidedOn);
+        else if (mover instanceof Ghost ghost) {
+            ghostColliding(ghost, collidedOn);
         }
-        else if (mover instanceof Pellet) {
-            pelletColliding((Pellet) mover, collidedOn);
+        else if (mover instanceof Pellet pellet) {
+            pelletColliding(pellet, collidedOn);
         }
     }
 
     private void playerColliding(Player player, Unit collidedOn) {
-        if (collidedOn instanceof Ghost) {
-            playerVersusGhost(player, (Ghost) collidedOn);
+        if (collidedOn instanceof Ghost ghost) {
+            playerVersusGhost(player, ghost);
         }
-        if (collidedOn instanceof Pellet) {
-            playerVersusPellet(player, (Pellet) collidedOn);
+        if (collidedOn instanceof Pellet pellet) {
+            playerVersusPellet(player, pellet);
         }
     }
 
     private void ghostColliding(Ghost ghost, Unit collidedOn) {
-        if (collidedOn instanceof Player) {
-            playerVersusGhost((Player) collidedOn, ghost);
+        if (collidedOn instanceof Player player) {
+            playerVersusGhost(player, ghost);
         }
     }
 
     private void pelletColliding(Pellet pellet, Unit collidedOn) {
-        if (collidedOn instanceof Player) {
-            playerVersusPellet((Player) collidedOn, pellet);
+        if (collidedOn instanceof Player player) {
+            playerVersusPellet(player, pellet);
         }
     }
 
