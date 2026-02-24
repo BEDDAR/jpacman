@@ -3,6 +3,7 @@ package nl.tudelft.jpacman.level;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -153,5 +154,47 @@ class LevelTest {
         level.registerPlayer(p2);
         level.registerPlayer(p3);
         verify(p3).occupy(square1);
+    }
+
+    // On simule un joueur mort (isAlive=false) mais avec des vies restantes (getLives=2).
+    // On s'attend à ce que le level le respawn sans déclencher levelLost.
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void playerWithLivesIsRespawnedOnDeath() {
+        Level.LevelObserver observer = mock(Level.LevelObserver.class);
+        level.addObserver(observer);
+
+        Player p = mock(Player.class);
+        when(p.isAlive()).thenReturn(false);
+        when(p.getLives()).thenReturn(2);
+
+        level.registerPlayer(p);
+        level.start();
+        level.stop();
+
+        // Le jeu ne doit pas s'arrêter
+        verify(observer, never()).levelLost();
+        // Le joueur doit avoir été ressuscité et replacé au point de départ
+        verify(p).setAlive(true);
+        verify(p, times(2)).occupy(square1); // 1 fois à registerPlayer + 1 fois au respawn
+    }
+
+    // On simule un joueur mort sans vies restantes (getLives=0).
+    // On s'attend à ce que levelLost soit appelé.
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void playerWithNoLivesTriggersLevelLost() {
+        Level.LevelObserver observer = mock(Level.LevelObserver.class);
+        level.addObserver(observer);
+
+        Player p = mock(Player.class);
+        when(p.isAlive()).thenReturn(false);
+        when(p.getLives()).thenReturn(0);
+
+        level.registerPlayer(p);
+        level.start();
+        level.stop();
+
+        verify(observer).levelLost();
     }
 }
